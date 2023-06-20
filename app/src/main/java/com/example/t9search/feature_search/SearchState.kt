@@ -1,4 +1,4 @@
-package com.example.t9search.feature_search.state
+package com.example.t9search.feature_search
 import com.example.t9search.AppConstants.WORDS_IN_DISPLAY_COUNT
 
 /**
@@ -16,7 +16,6 @@ data class SearchState(
     val isFailure: Boolean = false,
 
     val dialogText: String? = null,
-//    val allWords: HashSet<String> = HashSet(),
     var digits: Int? = null,
     val searchedWords: List<String> = emptyList()
 

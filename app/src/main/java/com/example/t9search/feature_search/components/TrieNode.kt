@@ -3,12 +3,14 @@ package com.example.t9search.feature_search
 import android.util.Log
 import com.example.t9search.AppConstants.TAG_TRIE_NODE
 
+/**
+ * [Trie search tree](https://www.geeksforgeeks.org/trie-insert-and-search/) with
+ */
 class TrieNode {
     val children: MutableMap<Char, TrieNode> = mutableMapOf()
     var isWord: Boolean = false
     var word: String = ""
 }
-
 
 class Trie {
     private val root: TrieNode = TrieNode()
@@ -72,24 +74,6 @@ class Trie {
         Log.i(TAG_TRIE_NODE, "results empty: ${results.isEmpty()}")
         return if (results.isEmpty()) emptyList() else results
 
-
-/*        if (startNods != null) {
-//            Log.i(TAG_TRIE_NODE, "prefix=null")
-//            searchAllWordsFromNode(st, "", results, limit)
-//        } else {
-//            for (string in prefix) {
-//                var node = root
-//                for (char in string) {
-//                    Log.i(TAG_TRIE_NODE, "for (char in string): $char")
-//                    val child = node.children[char] ?: break
-//                    node = child
-//                }
-//                searchWordsFromNode(node, string, results, limit)
-//            }
-//        }
-//        return results
- */
-
     }
 
     private fun searchAllWords(
@@ -106,37 +90,6 @@ class Trie {
         for ((_, child) in node.children) {
             searchAllWords(child, results, limit)
         }
-    }
-
-    fun searchAllWordsFromNode(
-        node: TrieNode,
-        prefix: String,
-        results: MutableList<String>,
-        limit: Int
-    ) {
-        if (results.size >= limit) return
-        if (node.isWord) {
-            results.add(prefix)
-        }
-        for ((char, child) in node.children) {
-            val newPrefix = prefix + char
-            searchAllWordsFromNode(child, newPrefix, results, limit)
-        }
-    }
-
-    fun searchWordsWithPrefixTEST(prefix: List<String>, limit: Int): List<String> {
-        val results = mutableListOf<String>()
-
-        for (string in prefix) {
-            var node = root
-            for (char in string) {
-                val child = node.children[char] ?: break
-                node = child
-            }
-            searchWordsFromNode(node, string, results, limit)
-        }
-
-        return results
     }
 
     fun searchWordsFromNode(
@@ -156,9 +109,6 @@ class Trie {
         for ((char, child) in node.children) {
             val newPrefix = prefix + char
             searchWordsFromNode(child, newPrefix, results, limit)
-//            if (results.size >= limit){
-//                return
-//            }
         }
     }
 }

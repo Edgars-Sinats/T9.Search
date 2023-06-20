@@ -34,8 +34,7 @@ fun SearchScreen(){
         searchViewModel.loadDictionary()
     }
 
-    val searchState = searchViewModel.state.collectAsState()
-
+    val searchState =  searchViewModel.state.collectAsState()
     SearchBar(
         text = searchState.value.digits.toString(),
         onValueChange = {
@@ -70,6 +69,9 @@ fun SearchBar(
     if (!enabled){
         ProgressBar()
     }
+    //TODO For padding recomposition on ime
+//    val windowInsets = WindowInsets
+//    val imeVisible: Boolean = windowInsets.isImeVisible
     if (popUpMsg!=null){
         MyDialog(
             text = popUpMsg,
@@ -80,11 +82,11 @@ fun SearchBar(
     Scaffold(
         bottomBar = {
             BasicTextField(
-                value = if (text!="null") {
+                value = if ( text!="null" ) {
                     text
                 } else { ("") },
                 onValueChange = {
-                    if (it.isBlank() || (it.toIntOrNull() != null && it != "1" && it != "0")){
+                    if (it.isBlank() || (it.toIntOrNull() != null && !it.endsWith("1") && !it.endsWith("0") ) ){
                         onValueChange(it)
                     } else {
                         showDialogMsg(AppConstants.ENTER_VALID_NUMBER)
@@ -98,7 +100,6 @@ fun SearchBar(
                     fontWeight = FontWeight.Medium,
                     color = Color.DarkGray
                 ),
-//            keyboardActions = KeyboardActions()
                 modifier = modifier
                     .background(MaterialTheme.colorScheme.background)
                     .padding(4.dp)
@@ -131,22 +132,27 @@ fun SearchBar(
             )
         },
         content = {
-            LazyColumn {
-                item {
-                    chosenWords?.forEach { wordItem ->
-                        val annotatedString = buildAnnotatedString {
-                            append(wordItem)
-                            if (text != "null"){
-                                addStyle(
-                                    SpanStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = Color.Red),
-                                    start = 0,
-                                    end = text.length)
+            Box(modifier = Modifier
+                //TODO check windowInsets for setting content items on top of device. (Resetting padding from ime change)
+//                .padding(bottom = if (imeVisible) windowInsets.ime.getBottom() else 0.dp)
+                .fillMaxSize()) {
+                LazyColumn {
+                    item {
+                        chosenWords?.forEach { wordItem ->
+                            val annotatedString = buildAnnotatedString {
+                                append(wordItem)
+                                if (text != "null"){
+                                    addStyle(
+                                        SpanStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = Color.Red),
+                                        start = 0,
+                                        end = text.length)
+                                }
                             }
+                            Text(text = annotatedString,
+                                modifier
+                                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp)
+                                    .fillMaxWidth())
                         }
-                        Text(text = annotatedString,
-                            modifier
-                                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp)
-                                .fillMaxWidth())
                     }
                 }
             }
