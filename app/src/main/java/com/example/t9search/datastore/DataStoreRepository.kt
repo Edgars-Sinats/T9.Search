@@ -15,10 +15,11 @@ class DataStoreRepository(private val context: Context) {
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("t9_pref")
         val WORD_MAXIMUM_KEY = intPreferencesKey("word_maximum_key")
-        val SYSTEM_DARK_THEME_KEY = booleanPreferencesKey("system_dark_theme")
+        val SHOW_POP_UP_KEY = booleanPreferencesKey("pop_up_disabled")
+
     }
 
-    val readOnBoardingState: Flow<Int> =
+    val readMaxWordCountState: Flow<Int> =
         context.dataStore.data
             .catch { exception ->
                 if (exception is IOException) {
@@ -31,13 +32,13 @@ class DataStoreRepository(private val context: Context) {
                 it[WORD_MAXIMUM_KEY] ?: AppConstants.WORDS_IN_DISPLAY_COUNT
             }
 
-    suspend fun saveOnBoardingState(count: Int) {
+    suspend fun saveMaxWordCountState(count: Int) {
         context.dataStore.edit {
             it[WORD_MAXIMUM_KEY] = count
         }
     }
 
-    val readIsDarkTheme: Flow<Boolean> =
+    val readIsPopUpMsgOn: Flow<Boolean> =
         context.dataStore.data
             .catch { exception ->
                 if (exception is IOException) {
@@ -47,11 +48,11 @@ class DataStoreRepository(private val context: Context) {
                 }
             }
             .map {
-                it[SYSTEM_DARK_THEME_KEY] ?: false
+                it[SHOW_POP_UP_KEY] ?: false
             }
-    suspend fun saveIsDarkTheme(exist: Boolean){
+    suspend fun saveIsPopUpMsgOn(exist: Boolean){
         context.dataStore.edit {
-            it[SYSTEM_DARK_THEME_KEY] = exist
+            it[SHOW_POP_UP_KEY] = exist
         }
     }
 

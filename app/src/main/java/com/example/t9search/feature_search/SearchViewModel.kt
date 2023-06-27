@@ -1,21 +1,23 @@
 package com.example.t9search.feature_search
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.t9search.AppConstants
 import com.example.t9search.DataRepository
+import com.example.t9search.datastore.DataStoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val dataRepository: DataRepository
+    private val dataRepository: DataRepository,
+    private val dataStoreRepository: DataStoreRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
@@ -35,6 +37,8 @@ class SearchViewModel @Inject constructor(
 
             lookup("")
             _state.value = _state.value.copy(isLoading = false)
+            //To show ProgressBar
+            delay(500)
             //When we have allWords loading is finished and on Screen words are shown.
             if (trie.checkWord("abiogenetically") ){
                 _state.value = _state.value.copy(isSuccess = true)
@@ -45,6 +49,7 @@ class SearchViewModel @Inject constructor(
     }
 
     //Digits are prefix what are searched in trie
+
     /**
      * Lookup fun is executed on every time user change search bar.
      * [digits] represent numbers in string format and "" in case of null in search bar, then returns words without filter.
@@ -54,7 +59,7 @@ class SearchViewModel @Inject constructor(
     fun lookup(digits: String){
 
         val convertedNumberChar = convertNumberToLetters(digits)
-        val results1 = trie.searchWordsWithPrefix(convertedNumberChar, AppConstants.WORDS_IN_DISPLAY_COUNT)
+        val results1 = trie.searchWordsWithPrefix(convertedNumberChar, _state.value.maxWordsCount)
 
         if (convertedNumberChar == null){
             _state.value = _state.value.copy(searchedWords = results1, digits = null)
@@ -62,14 +67,45 @@ class SearchViewModel @Inject constructor(
             _state.value = _state.value.copy(searchedWords = results1, digits = digits.toInt())
         }
     }
-
-
-
     fun setDialog(text: String?){
         if (text==null){
             _state.value = _state.value.copy(dialogText = null)
         }else{
             _state.value = _state.value.copy(dialogText = text)
+        }
+    }
+
+
+
+    //Func. to update settings and toggle pop up msg dialog.
+    fun savePopUpSettings(popUpSettings: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.saveIsPopUpMsgOn(popUpSettings)
+            Log.i(AppConstants.TAG_SEARCH_VIEW_MODEL, "popUpSettings: $popUpSettings")
+        }
+    }
+
+    fun updatePopUpSettings() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val popUpDialog= dataStoreRepository.readIsPopUpMsgOn.first()
+            _state.value = _state.value.copy(dialogPopUp = popUpDialog)
+        }
+    }
+
+    fun saveMaxWordCount(wordCount: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStoreRepository.saveMaxWordCountState(wordCount)
+            Log.i(AppConstants.TAG_SEARCH_VIEW_MODEL, "saveMaxWordCountState: $wordCount")
+            updateMaxWordCount()
+        }
+    }
+
+    /** Updating in DataStore maxWords what are set as defaults in WORDS_IN_DISPLAY_COUNT
+     */
+    fun updateMaxWordCount() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val maxWords= dataStoreRepository.readMaxWordCountState.first()
+            _state.value = _state.value.copy(maxWordsCount = maxWords)
         }
     }
 }

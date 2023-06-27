@@ -2,6 +2,7 @@ package com.example.t9search.feature_search
 
 import android.content.Context
 import com.example.t9search.DataRepository
+import com.example.t9search.datastore.DataStoreRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,11 +20,10 @@ object DataModule {
         @ApplicationContext context: Context
     ) = DataRepository(context)
 
-    //TODO create dataStore for user Settings
-//    @Provides
-//    @Singleton
-//    fun providesDataStoreRepository(
-//        @ApplicationContext context: Context
-//    ) = DataStoreRepository(context)
+    @Provides
+    @Singleton
+    fun providesDataStoreRepository(
+        @ApplicationContext context: Context
+    ) = DataStoreRepository(context)
 
 }

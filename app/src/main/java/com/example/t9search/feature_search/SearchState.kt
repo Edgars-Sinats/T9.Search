@@ -9,6 +9,7 @@ import com.example.t9search.AppConstants.WORDS_IN_DISPLAY_COUNT
  * [searchedWords] filtered words to display in Screen with limit of @ [WORDS_IN_DISPLAY_COUNT]
  *
  * [dialogText] show text in Suggestion Dialog. TODO add for dialog button - 'don`t show' and save it in DataStore custom text to not repeat for user.
+ * [dialogPopUp] enabled to toggle dialogText dialog.
  */
 data class SearchState(
     val isLoading: Boolean = false,
@@ -16,7 +17,9 @@ data class SearchState(
     val isFailure: Boolean = false,
 
     val dialogText: String? = null,
+    val dialogPopUp: Boolean = true,
     var digits: Int? = null,
-    val searchedWords: List<String> = emptyList()
+    val searchedWords: List<String> = emptyList(),
+    val maxWordsCount: Int = WORDS_IN_DISPLAY_COUNT
 
 )

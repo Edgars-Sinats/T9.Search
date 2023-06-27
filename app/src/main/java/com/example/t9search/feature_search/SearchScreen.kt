@@ -9,9 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -26,32 +24,33 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.t9search.AppConstants
 import com.example.t9search.AppConstants.ENTER_NUMBERS
 import com.example.t9search.components.ProgressBar
+//import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 
 @Composable
-fun SearchScreen(){
-    val searchViewModel: SearchViewModel = viewModel()
+fun SearchScreen(searchViewModel: SearchViewModel){
+//    val searchViewModel: SearchViewModel = viewModel()
     LaunchedEffect(key1 = true){
         searchViewModel.loadDictionary()
     }
 
-    val searchState =  searchViewModel.state.collectAsState()
+    val searchState by searchViewModel.state.collectAsState()
     SearchBar(
-        text = searchState.value.digits.toString(),
+        text = searchState.digits.toString(),
         onValueChange = {
-            Log.i("Screen","onValueChange digits: ${searchState.value.digits}")
+            Log.i("Screen","onValueChange digits: ${searchState.digits}")
             Log.i("Screen","onValueChange it: $it")
             if (it == "1"|| it == "0"){
                 searchViewModel.setDialog(AppConstants.ENTER_1_OR_2)
-
             }
             if ( it != "null" ){
                 searchViewModel.lookup( it )
             }
         },
-        enabled = searchState.value.isSuccess,
+        enabled = searchState.isSuccess,
         modifier = Modifier,
-        chosenWords = searchState.value.searchedWords,
-        popUpMsg = searchState.value.dialogText,
+        chosenWords = searchState.searchedWords,
+        popUpMsg = searchState.dialogText,
         showDialogMsg = {searchViewModel.setDialog(text = it)}
     )
 }
@@ -66,12 +65,8 @@ fun SearchBar(
     popUpMsg: String?,
     showDialogMsg:(String?) ->Unit
 ){
-    if (!enabled){
-        ProgressBar()
-    }
-    //TODO For padding recomposition on ime
-//    val windowInsets = WindowInsets
-//    val imeVisible: Boolean = windowInsets.isImeVisible
+
+
     if (popUpMsg!=null){
         MyDialog(
             text = popUpMsg,
@@ -132,26 +127,30 @@ fun SearchBar(
             )
         },
         content = {
-            Box(modifier = Modifier
-                //TODO check windowInsets for setting content items on top of device. (Resetting padding from ime change)
-//                .padding(bottom = if (imeVisible) windowInsets.ime.getBottom() else 0.dp)
-                .fillMaxSize()) {
-                LazyColumn {
-                    item {
-                        chosenWords?.forEach { wordItem ->
-                            val annotatedString = buildAnnotatedString {
-                                append(wordItem)
-                                if (text != "null"){
-                                    addStyle(
-                                        SpanStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = Color.Red),
-                                        start = 0,
-                                        end = text.length)
+            if (!enabled){
+                ProgressBar()
+            } else {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn {
+                        item {
+                            chosenWords?.forEach { wordItem ->
+                                val annotatedString = buildAnnotatedString {
+                                    append(wordItem)
+                                    if (text != "null"){
+                                        addStyle(
+                                            SpanStyle(fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, color = Color.Red),
+                                            start = 0,
+                                            end = text.length)
+                                    }
                                 }
+                                Text(text = annotatedString,
+                                    modifier
+                                        .padding(start = 16.dp,
+                                            end = 16.dp,
+                                            top = 8.dp,
+                                            bottom = 0.dp)
+                                        .fillMaxWidth())
                             }
-                            Text(text = annotatedString,
-                                modifier
-                                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp)
-                                    .fillMaxWidth())
                         }
                     }
                 }
