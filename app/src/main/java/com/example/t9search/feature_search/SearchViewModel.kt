@@ -26,6 +26,24 @@ class SearchViewModel @Inject constructor(
     private val trie = Trie()
     //TODO implement Class SearchEvents
 
+    fun onEvent(event: SearchEvent){
+        when (event) {
+            is SearchEvent.Lookup -> {
+                lookup(digits = event.lookUpValue.toString())
+            }
+            is SearchEvent.UpdateWordCount -> {
+                saveMaxWordCount(event.count)
+                updateMaxWordCount()
+            }
+            is SearchEvent.SetDialogMessage -> {
+                setDialog(event.dialogMsg)
+            }
+            is SearchEvent.UpdatePopUpSettings -> {
+                updatePopUpSettings()
+            }
+        }
+    }
+
     fun loadDictionary(){
         _state.value = _state.value.copy(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
@@ -64,9 +82,10 @@ class SearchViewModel @Inject constructor(
         if (convertedNumberChar == null){
             _state.value = _state.value.copy(searchedWords = results1, digits = null)
         } else {
-            _state.value = _state.value.copy(searchedWords = results1, digits = digits.toInt())
+            _state.value = _state.value.copy(searchedWords = results1, digits = digits.toLong())
         }
     }
+
     fun setDialog(text: String?){
         if (text==null){
             _state.value = _state.value.copy(dialogText = null)
@@ -96,7 +115,6 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             dataStoreRepository.saveMaxWordCountState(wordCount)
             Log.i(AppConstants.TAG_SEARCH_VIEW_MODEL, "saveMaxWordCountState: $wordCount")
-            updateMaxWordCount()
         }
     }
 

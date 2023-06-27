@@ -20,16 +20,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.t9search.AppConstants
 import com.example.t9search.AppConstants.ENTER_NUMBERS
 import com.example.t9search.components.ProgressBar
-//import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 
 @Composable
-fun SearchScreen(searchViewModel: SearchViewModel){
-//    val searchViewModel: SearchViewModel = viewModel()
+fun SearchScreen(
+    searchViewModel: SearchViewModel
+){
     LaunchedEffect(key1 = true){
         searchViewModel.loadDictionary()
     }
@@ -41,17 +40,17 @@ fun SearchScreen(searchViewModel: SearchViewModel){
             Log.i("Screen","onValueChange digits: ${searchState.digits}")
             Log.i("Screen","onValueChange it: $it")
             if (it == "1"|| it == "0"){
-                searchViewModel.setDialog(AppConstants.ENTER_1_OR_2)
+                searchViewModel.onEvent(SearchEvent.SetDialogMessage(AppConstants.ENTER_1_OR_2)) //setDialog(AppConstants.ENTER_1_OR_2)
             }
             if ( it != "null" ){
-                searchViewModel.lookup( it )
+                searchViewModel.onEvent(SearchEvent.Lookup(it.toLong()))//lookup( it )
             }
         },
         enabled = searchState.isSuccess,
         modifier = Modifier,
         chosenWords = searchState.searchedWords,
         popUpMsg = searchState.dialogText,
-        showDialogMsg = {searchViewModel.setDialog(text = it)}
+        showDialogMsg =  searchViewModel::onEvent
     )
 }
 
@@ -63,14 +62,14 @@ fun SearchBar(
     modifier: Modifier,
     chosenWords: List<String>?,
     popUpMsg: String?,
-    showDialogMsg:(String?) ->Unit
+    showDialogMsg: (SearchEvent) ->Unit
 ){
 
 
     if (popUpMsg!=null){
         MyDialog(
             text = popUpMsg,
-            onDismiss = { showDialogMsg(null) }
+            onDismiss = { showDialogMsg(SearchEvent.SetDialogMessage(popUpMsg)) }
         )
     }
 
@@ -84,7 +83,7 @@ fun SearchBar(
                     if (it.isBlank() || (it.toIntOrNull() != null && !it.endsWith("1") && !it.endsWith("0") ) ){
                         onValueChange(it)
                     } else {
-                        showDialogMsg(AppConstants.ENTER_VALID_NUMBER)
+                        showDialogMsg(SearchEvent.SetDialogMessage(AppConstants.ENTER_VALID_NUMBER))
                         Log.i("","Sorry unacceptable parameter")
                     }
                 },

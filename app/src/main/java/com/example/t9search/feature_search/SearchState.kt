@@ -18,8 +18,7 @@ data class SearchState(
 
     val dialogText: String? = null,
     val dialogPopUp: Boolean = true,
-    var digits: Int? = null,
+    var digits: Long? = null,
     val searchedWords: List<String> = emptyList(),
     val maxWordsCount: Int = WORDS_IN_DISPLAY_COUNT
-
 )

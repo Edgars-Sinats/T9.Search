@@ -11,17 +11,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.t9search.feature_search.SearchEvent
 
 @Composable
 fun SettingsScreen(
     loadedWordCount: Int,
-    onLoadedWordCountChange: (Int) -> Unit,
+    onLoadedWordCountChange: (SearchEvent) -> Unit,
     switchPopUpSettings: Boolean,
     onSwitchPopUpChange: (Boolean) -> Unit,
 
 ) {
      var newCount by remember { mutableStateOf(loadedWordCount) }
-//    var isOpen by remember { mutableStateOf(false) }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -77,7 +77,7 @@ fun SettingsScreen(
                 enabled = newCount!=0 && newCount != loadedWordCount,
                 onClick = {
                     Log.i("SettingsScreen","onClick: $newCount")
-                    onLoadedWordCountChange(newCount)
+                    onLoadedWordCountChange(SearchEvent.UpdateWordCount(newCount))
                           },
 
             ) {
